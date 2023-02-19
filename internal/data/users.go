@@ -5,8 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"time"
-	"golang.org/x/crypto/bcrypt"
+
 	"github.melomii/futDraft/internal/validator"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -53,7 +54,6 @@ func (m UsersModel) Insert(user *Users) error {
 			return err
 		}
 	}
-
 	return nil
 }
 

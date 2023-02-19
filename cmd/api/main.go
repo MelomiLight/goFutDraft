@@ -7,14 +7,11 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"sync"
 	"time"
-
+	_ "github.com/lib/pq"
 	"github.melomii/futDraft/internal/data"
 	"github.melomii/futDraft/internal/jsonlog"
 )
-const version = "1.0.0"
-
 type config struct {
 	port int
 	env  string
@@ -36,7 +33,6 @@ type application struct {
 	config config
 	logger *jsonlog.Logger
 	models data.Models
-	wg  sync.WaitGroup
 }
 
 func main() {

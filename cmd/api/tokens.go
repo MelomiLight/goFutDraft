@@ -2,60 +2,13 @@ package main
 
 import (
 	"errors"
-	"net/http"
-	"time"
-
 	data2 "github.melomii/futDraft/internal/data"
 	"github.melomii/futDraft/internal/validator"
+	"net/http"
+	"time"
 )
 
-func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		Name     string `json:"name"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
-
-	err := app.readJSON(w, r, &input)
-	if err != nil {
-		app.badRequestResponse(w, r, err)
-		return
-	}
-
-	user := &data2.Users{
-		Name:      input.Name,
-		Email:     input.Email,
-	}
-
-	err = user.Password.Set(input.Password)
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
-		return
-	}
-
-	v := validator.New()
-
-	if data2.ValidateUser(v, user); !v.Valid() {
-		app.failedValidationResponse(w, r, v.Errors)
-		return
-	}
-
-	err = app.models.Users.Insert(user)
-
-	if err != nil {
-		switch {
-		case errors.Is(err, data2.ErrDuplicateEmail):
-			v.AddError("email", "a user with this email address already exists")
-			app.failedValidationResponse(w, r, v.Errors)
-		default:
-			app.serverErrorResponse(w, r, err)
-		}
-		return
-	}
-}
-
-
-func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -108,6 +61,4 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
-	
-	
 }

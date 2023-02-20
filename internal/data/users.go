@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"time"
+	"crypto/sha256"
 
 	"github.melomii/futDraft/internal/validator"
 	"golang.org/x/crypto/bcrypt"
@@ -32,7 +33,10 @@ type password struct {
 	hash      []byte
 }
 
-
+func (u *Users) IsAnonymous() bool {
+	return u == AnonymousUser
+	}
+	
 
 func (m UsersModel) Insert(user *Users) error {
 	query :=
@@ -108,4 +112,66 @@ func ValidateUser(v *validator.Validator, user *Users) {
 	if user.Password.hash == nil {
 		panic("missing password hash for user")
 	}
+}
+
+func (m UsersModel) GetByEmail(email string) (*Users, error) {
+	query := `SELECT * FROM users WHERE email = $1`
+
+	var user Users
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, email).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.Password.hash,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &user, nil
+}
+func (m UsersModel) GetForToken(tokenScope, tokenPlaintext string) (*Users, error) {
+	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
+
+	query := `
+		SELECT users.id, users.name, users.email, users.password_hash
+		FROM users INNER JOIN tokens
+		ON users.id = tokens.user_id
+		WHERE tokens.hash = $1
+		AND tokens.scope = $2
+		AND tokens.expiry > $3`
+
+	args := []any{tokenHash[:], tokenScope, time.Now()}
+
+	var user Users
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.Password.hash,
+	)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &user, nil
 }

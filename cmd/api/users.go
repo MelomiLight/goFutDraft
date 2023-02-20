@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"html/template"
 	"net/http"
 	"time"
 
@@ -109,5 +110,41 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 		app.serverErrorResponse(w, r, err)
 	}
 	
-	
 }
+
+func (app *application) showRegistrationForm(w http.ResponseWriter, r *http.Request) {
+	// Define the data to be passed to the template
+	data := struct {
+	  Title string
+	}{
+	  Title: "User Registration",
+	}
+  
+	// Define the template
+	tmpl := template.Must(template.ParseFiles("./public/html/reg.html"))
+  
+	// Render the template
+	err := tmpl.Execute(w, data)
+	if err != nil {
+	  http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	  return
+	}
+  }
+  func (app *application) showLoginForm(w http.ResponseWriter, r *http.Request) {
+	// Define the data to be passed to the template
+	data := struct {
+	  Title string
+	}{
+	  Title: "User Registration",
+	}
+  
+	// Define the template
+	tmpl := template.Must(template.ParseFiles("./public/html/login.html"))
+  
+	// Render the template
+	err := tmpl.Execute(w, data)
+	if err != nil {
+	  http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	  return
+	}
+  }

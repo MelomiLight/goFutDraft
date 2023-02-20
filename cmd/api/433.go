@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	
 )
 
 type Positions struct {
@@ -28,7 +29,7 @@ type Response struct {
 
 
 func (app *application) futDraftHandler(w http.ResponseWriter, r *http.Request) {
-	
+
 	user := app.contextGetUser(r)
 	if user.IsAnonymous() {
 		app.authenticationRequiredResponse(w, r)

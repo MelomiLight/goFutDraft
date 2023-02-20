@@ -17,7 +17,9 @@ func (app *application) routes() http.Handler {
 	
 
 	router.HandlerFunc(http.MethodPost, "/register", app.registerUserHandler)
+	router.HandlerFunc(http.MethodGet, "/register", app.showRegistrationForm)
 	router.HandlerFunc(http.MethodPost,"/login", app.loginUserHandler)
+	router.HandlerFunc(http.MethodGet,"/login", app.showLoginForm)
 	router.HandlerFunc(http.MethodGet,"/futDraft", app.futDraftHandler)
 
 	return app.recoverPanic(app.rateLimit(app.authenticate(router)))

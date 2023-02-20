@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Login</title>
+</head>
+<body>
+  <h1>User Login</h1>
+
+  <form id="login-form">
+    <label for="email">Email:</label>
+    <input type="email" name="email" id="email">
+
+    <label for="password">Password:</label>
+    <input type="password" name="password" id="password">
+
+    <button type="submit">Login</button>
+  </form>
+
+  <script>
+    const form = document.getElementById("login-form");
+
+    form.addEventListener("submit", (event) => {
+      // Prevent the default form submission behavior
+      event.preventDefault();
+
+      // Get the form data
+      const formData = new FormData(form);
+
+      // Convert the form data to a JSON object
+      const jsonObject = {};
+
+      formData.forEach((value, key) => {
+        jsonObject[key] = value;
+      });
+
+      // Send the form data as JSON using a fetch request
+      fetch("/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(jsonObject),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+
+          // Redirect to the home page
+          window.location.href = "/login";
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    });
+  </script>
+</body>
+</html>

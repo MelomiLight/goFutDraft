@@ -14,6 +14,8 @@ type Models struct {
 	Players PlayersModel
 	Clubs ClubsModel
 	Nations NationsModel
+	Tokens TokenModel
+	Position433 Position433Model
 	Leagues LeaguesModel
 	Users UsersModel
 }
@@ -24,6 +26,8 @@ func NewModels(db *sql.DB) Models {
 		Clubs: ClubsModel{DB: db},
 		Nations: NationsModel{DB: db},
 		Leagues: LeaguesModel{DB: db},
+		Tokens: TokenModel{DB: db},
 		Users: UsersModel{DB: db},
+		Position433: Position433Model{DB: db},
 	}
 }

@@ -65,7 +65,11 @@ func main() {
 		logger: logger,
 		models: data.NewModels(db),
 	}
-
+	// app.insertPlayers(6)
+	// app.insertClubs(6)
+	// app.insertLeagues(4)
+	// app.insertNations(9)
+	
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
 		Handler:      app.routes(),
@@ -82,8 +86,6 @@ func main() {
 	if err != nil {
 		logger.PrintFatal(err, nil)
 	}
-
-	
 }
 
 

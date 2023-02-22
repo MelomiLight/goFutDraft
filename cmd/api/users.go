@@ -10,7 +10,7 @@ import (
 	"github.melomii/futDraft/internal/validator"
 )
 
-func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) 	registerUserHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Name     string `json:"name"`
 		Email    string `json:"email"`
@@ -53,6 +53,12 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		}
 		return
 	}
+
+	err = app.writeJSON(w, http.StatusCreated, envelope{"Message": "User has been created"}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+	
 }
 
 

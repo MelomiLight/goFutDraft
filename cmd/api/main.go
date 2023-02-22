@@ -66,7 +66,7 @@ func main() {
 		models: data.NewModels(db),
 	}
 	// app.insertPlayers(6)
-	// app.insertClubs(6)
+	// app.insertClubs(36)
 	// app.insertLeagues(4)
 	// app.insertNations(9)
 	

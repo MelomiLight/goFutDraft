@@ -8,19 +8,19 @@ import (
 )
 
 type Players struct {
-	ID        int    `json:"id"`
-	CommonName string `json:"commonName"`
-	Position  string `json:"position"`
-	League  int `json:"league"`
-	Nation    int `json:"nation"`
-	Club  int `json:"club"`
-	Rating int `json:"rating"`
-	Pace int `json:"pace"`
-	Shooting int `json:"shooting"`
-	Passing int `json:"passing"`
-	Dribbling int `json:"dribbling"`
-	Defending int `json:"defending"`
-	Physicality int `json:"physicality"`
+	ID        int    `json:"id,omitempty"`
+	CommonName string `json:"commonName,omitempty"`
+	Position  string `json:"position,omitempty"`
+	League  int `json:"league,omitempty"`
+	Nation    int `json:"nation,omitempty"`
+	Club  int `json:"club,omitempty"`
+	Rating int `json:"rating,omitempty"`
+	Pace int `json:"pace,omitempty"`
+	Shooting int `json:"shooting,omitempty"`
+	Passing int `json:"passing,omitempty"`
+	Dribbling int `json:"dribbling,omitempty"`
+	Defending int `json:"defending,omitempty"`
+	Physicality int `json:"physicality,omitempty"`
  }
 
 type PlayersModel struct {
@@ -74,4 +74,53 @@ func (p PlayersModel) Get(id int64) (*Players, error) {
 	}
 
 	return &player, nil
+}
+
+func (p PlayersModel) GetAll(filters Filters) ([]*Players, Metadata, error) {
+	query := `SELECT * FROM players`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	
+
+	rows, err := p.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, Metadata{}, err
+	}
+
+	defer rows.Close()
+
+	totalRecords := filters.PageSize
+	players := []*Players{}
+	for rows.Next() {
+		var player Players
+		err := rows.Scan(
+			&totalRecords,
+			&player.ID,
+			&player.CommonName,
+			&player.League,
+			&player.Nation,
+			&player.Club,
+			&player.Rating,
+			&player.Pace,
+			&player.Shooting,
+			&player.Passing,
+			&player.Dribbling,
+			&player.Defending,
+			&player.Physicality,
+		)
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+
+		players = append(players, &player)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, Metadata{}, err
+	}
+
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+	return players, metadata, nil
 }

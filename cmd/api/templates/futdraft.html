@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>FIFA Fut Draft</title>
-	<link rel="stylesheet" type="text/css" href="/cmd/api/templates/futdraft.css">
+	<link rel="stylesheet" type="text/css" href="futdraft.css">
 	<script src="wasm_exec.js"></script>
 	<script>
 		if (WebAssembly) {
@@ -16,22 +16,70 @@
 			console.log("WebAssembly is not supported in your browser")
 		}
 	</script>
+	<style>
+		body{
+			background-image: url('https://img.freepik.com/free-vector/black-background-dark-wallpaper-with-diamond-perspective-pattern_1017-30294.jpg');
+			background-repeat: no-repeat;
+			background-size: 100%;
+		}
+
+		button{
+			width: 100%;
+			height: 100%;
+		}
+
+		.up, .middle, .down, .goalkeeper, .choose{
+			width: 100%;
+			height: 200px;
+			display: block;
+		}
+
+		.lw, .cf, .rw, .cm, .rb, .cb, .lb, .keeper, .choice{
+			display: inline-block;
+			margin: auto;
+			border: double;
+			width: 100px;
+			height: 170px;
+			color:white;
+		}
+
+		.up{
+			border: dotted;
+		}
+		.middle{
+			border: dashed;
+		}
+		.down{
+			border: thin;
+		}
+		.goalkeeper{
+			border: medium;
+		}
+		.skameika{
+			display: inline-block;
+			margin: auto;
+			border: double;
+			width: 70px;
+			height: 150px;
+			color:white;
+		}
+	</style>
 </head>
 <body>
 	<div class="up">
 		<center>
 			<div class="lw">
-				<button>
+				<button value="0">
 					LW
 				</button>
 			</div>
 			<div class="cf">
-				<button>
+				<button value="0">
 					CF
 				</button>
 			</div>
 			<div class="rw">
-				<button>
+				<button value="0">
 					RW
 				</button>
 			</div>
@@ -41,17 +89,17 @@
 	<div class="middle">
 		<center>
 		<div class="cm">
-			<button>
+			<button value="0">
 					CM
 			</button>
 		</div>
 		<div class="cm">
-			<button>
+			<button value="0">
 					CM
 			</button>
 		</div>
 		<div class="cm">
-			<button>
+			<button value="0">
 					CM
 			</button>
 		</div>
@@ -60,28 +108,28 @@
 	<div class="down">
 		<center>
 		<div class="lb">
-			<button>
+			<button value="0">
 					LB
-			</button>
+			</button value="0">
 		</div>
 		<div class="cb">
 			<button>
 					CB
-			</button>
+			</button value="0">
 		</div>
 		<div class="cb">
-			<button>
+			<button value="0">
 					CB
 			</button>
 		</div>
 		<div class="rb">
-			<button>
+			<button value="0">
 					RB
 			</button>
 		</div>
 		</center>
 	</div>
-	<div class="goalkeeper">
+	<div class="goalkeeper" value="0">
 		<center>
 			<div class="keeper">
 				<button>
@@ -93,60 +141,33 @@
 	<p style="color: white">Скамейка запасных</p>
 	<div class="banka">
 		<div class="skameika">
-			<button>
+			<button value="0">
+				{{ .CommonName}}
+			</button>
+		</div>
+		<div class="skameika">
+			<button value="0">
 				Merey
 			</button>
 		</div>
 		<div class="skameika">
-			<button>
+			<button value="0">
 				Merey
 			</button>
 		</div>
 		<div class="skameika">
-			<button>
+			<button value="0">
 				Merey
 			</button>
 		</div>
 		<div class="skameika">
-			<button>
+			<button value="0">
 				Merey
 			</button>
 		</div>
 		<div class="skameika">
-			<button>
+			<button value="0">
 				Merey
-			</button>
-		</div>
-		<div class="skameika">
-			<button>
-				Merey
-			</button>
-		</div>
-	</div>
-	<div class="choose">
-		<div class="choice">
-			<button>
-				Choose 1
-			</button>
-		</div>
-		<div class="choice">
-			<button>
-				Choose 2
-			</button>
-		</div>
-		<div class="choice">
-			<button>
-				Choose 3
-			</button>
-		</div>
-		<div class="choice">
-			<button>
-				Choose 4
-			</button>
-		</div>
-		<div class="choice">
-			<button>
-				Choose 5
 			</button>
 		</div>
 	</div>

@@ -26,18 +26,18 @@ func (app *application) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodGet,"/futDraft/players", app.ListPlayersHandler)
 	router.HandlerFunc(http.MethodGet,"/futDraft/players/:id", app.GetPlayerHandler)
-	// router.HandlerFunc(http.MethodPost,"/futDraft/players", app.CreatePlayerHandler)
-	// router.HandlerFunc(http.MethodDelete,"/futDraft/players/:id", app.DeletePlayerHandler)
-	// router.HandlerFunc(http.MethodPut,"/futDraft/players/:id", app.UpdatePlayerHandler)
+	router.HandlerFunc(http.MethodPost,"/futDraft/players", app.CreatePlayerHandler)
+	router.HandlerFunc(http.MethodDelete,"/futDraft/players/:id", app.DeletePlayerHandler)
+	router.HandlerFunc(http.MethodPut,"/futDraft/players/:id", app.UpdatePlayerHandler)
 
-	// router.HandlerFunc(http.MethodGet,"/futDraft/clubs", app.ListClubsHandler)
-	// router.HandlerFunc(http.MethodGet,"/futDraft/clubs/:id", app.GetClubHandler)
+	router.HandlerFunc(http.MethodGet,"/futDraft/clubs", app.ListClubsHandler)
+	router.HandlerFunc(http.MethodGet,"/futDraft/clubs/:id", app.GetClubHandler)
 
-	// router.HandlerFunc(http.MethodGet,"/futDraft/leagues", app.ListLeaguesHandler)
-	// router.HandlerFunc(http.MethodGet,"/futDraft/leagues:id", app.GetLeagueHandler)
+	router.HandlerFunc(http.MethodGet,"/futDraft/leagues", app.ListLeaguesHandler)
+	router.HandlerFunc(http.MethodGet,"/futDraft/leagues/:id", app.GetLeagueHandler)
 	
-	// router.HandlerFunc(http.MethodGet,"/futDraft/nations", app.ListNationsHandler)
-	// router.HandlerFunc(http.MethodGet,"/futDraft/nations/:id", app.GetNationHandler)
+	router.HandlerFunc(http.MethodGet,"/futDraft/nations", app.ListNationsHandler)
+	router.HandlerFunc(http.MethodGet,"/futDraft/nations/:id", app.GetNationHandler)
 
 	return app.recoverPanic(app.rateLimit(app.authenticate(router)))
 }

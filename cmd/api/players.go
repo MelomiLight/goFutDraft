@@ -1,143 +1,226 @@
 package main
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
-	"strings"
 
 	data2 "github.melomii/futDraft/internal/data"
+	"github.melomii/futDraft/internal/validator"
 )
 
-var players struct {
-	Pagination struct {
-		CountCurrent   int `json:"countCurrent"`
-		CountTotal     int `json:"countTotal"`
-		PageCurrent    int `json:"pageCurrent"`
-		PageTotal      int `json:"pageTotal"`
-		ItemsPerPage   int `json:"itemsPerPage"`
-	} `json:"pagination"`
-	Items []data2.Players `json:"items"`
-}
-
-var player struct{
-	Player struct{
-		ID        int    `json:"id,omitempty"`
-		CommonName string `json:"commonName,omitempty"`
-		Position  string `json:"position,omitempty"`
-		League  int `json:"league,omitempty"`
-		Nation    int `json:"nation,omitempty"`
-		Club  int `json:"club,omitempty"`
-		Rating int `json:"rating,omitempty"`
-		Pace int `json:"pace,omitempty"`
-		Shooting int `json:"shooting,omitempty"`
-		Passing int `json:"passing,omitempty"`
-		Dribbling int `json:"dribbling,omitempty"`
-		Defending int `json:"defending,omitempty"`
-		Physicality int `json:"physicality,omitempty"`
-	} `json:"player"`
-}
 func (app *application) ListPlayersHandler(w http.ResponseWriter, r *http.Request) {
-	page := r.URL.Query().Get("page")
-	if page == "" {
-		page = "1" // default to page 1 if the page query parameter is not provided
-	}
-	
-	url := fmt.Sprintf("https://futdb.app/api/players?page=%s", page)
-
-	headers := http.Header{
-		"accept":       {"application/json"},
-		"X-AUTH-TOKEN": {"c0ca8775-9e7a-471a-aa7e-1cd0ecb0fa44"},
+	var input struct {
+		CommonName string
+		Position  string
+		data2.Filters
 	}
 
-	// Create the HTTP client and request
-	client := http.Client{}
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		panic(err)
-	}
+	v := validator.New()
+	qs := r.URL.Query()
 
-	// Add the headers to the request
-	req.Header = headers
+	input.CommonName = app.readString(qs, "commonName", "")
+	input.Position = app.readString(qs, "position", "")
 
-	// Send the request and retrieve the response
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+	input.Filters.SortSafeList = []string{"commonName", "position", "rating", "-commonName", "-position", "-rating"}
 
-	// Parse the JSON response into a slice of Player structs
-	err = json.NewDecoder(resp.Body).Decode(&players)
-	if err != nil {
-		panic(err)
-	}
-
-	jsonPlayers, err := json.Marshal(&players)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if data2.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-	// Set the Content-Type header to application/json
-	w.Header().Set("Content-Type", "application/json")
 
-	// Write the JSON array in the response body
-	w.Write(jsonPlayers)
+	players, metadata, err := app.models.Players.GetAll(input.CommonName, input.Position, input.Filters)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"players": players, "metadata": metadata}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
 
 func (app *application) GetPlayerHandler(w http.ResponseWriter, r *http.Request) {
-
-	parts := strings.Split(r.URL.Path, "/")
-	id, err := strconv.Atoi(parts[len(parts)-1])
-
+	id, err := app.readIDParam(r)
 	if err != nil {
 		app.notFoundResponse(w, r)
 		return
 	}
 
-	url := fmt.Sprintf("https://futdb.app/api/players/%d", id)
-
-	headers := http.Header{
-		"accept":       {"application/json"},
-		"X-AUTH-TOKEN": {"c0ca8775-9e7a-471a-aa7e-1cd0ecb0fa44"},
-	}
-
-	// Create the HTTP client and request
-	client := http.Client{}
-	req, err := http.NewRequest("GET", url, nil)
+	players, err := app.models.Players.Get(id)
 	if err != nil {
-		panic(err)
-	}
-
-	// Add the headers to the request
-	req.Header = headers
-
-	// Send the request and retrieve the response
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	// Parse the JSON response into a slice of Player structs
-	err = json.NewDecoder(resp.Body).Decode(&player)
-	if err != nil {
-		panic(err)
-	}
-
-	//club,nation,leagus to string....
-
-	
-	jsonPlayer, err := json.Marshal(&player)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		switch {
+		case errors.Is(err, data2.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
-	
-	// Set the Content-Type header to application/json
-	w.Header().Set("Content-Type", "application/json")
 
-	// Write the JSON array in the response body
-	w.Write(jsonPlayer)
+	err = app.writeJSON(w, http.StatusOK, envelope{"player": players}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
+
+func (app *application) CreatePlayerHandler(w http.ResponseWriter, r *http.Request){
+	var input struct {
+		CommonName string `json:"commonName"`
+		Position  string `json:"position"`
+		League  int `json:"league"`
+		Nation    int `json:"nation"`
+		Club  int `json:"club"`
+		Rating int `json:"rating"`
+		Pace int `json:"pace"`
+		Shooting int `json:"shooting"`
+		Passing int `json:"passing"`
+		Dribbling int `json:"dribbling"`
+		Defending int `json:"defending"`
+		Physicality int `json:"physicality"`
+	}
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	players := &data2.Players{
+		CommonName: input.CommonName,
+		Position: input.Position,
+		League: input.League,  
+		Nation: input.Nation,    
+		Club: input.Club,  
+		Rating: input.Rating,
+		Pace: input.Pace, 
+		Shooting: input.Shooting, 
+		Passing: input.Passing, 
+		Dribbling: input.Dribbling, 
+		Defending: input.Defending, 
+		Physicality: input.Physicality, 
+	}
+
+	err = app.models.Players.Insert(players)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	headers := make(http.Header)
+	headers.Set("Location", fmt.Sprintf("/v1/players/%d", players.ID))
+
+	err = app.writeJSON(w, http.StatusCreated, envelope{"players": players}, headers)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) DeletePlayerHandler(w http.ResponseWriter, r *http.Request){
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	err = app.models.Players.Delete(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data2.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"message": "player successfully deleted"}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) UpdatePlayerHandler(w http.ResponseWriter, r *http.Request){
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	player, err := app.models.Players.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data2.ErrInvalidRuntimeFormat):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	var input struct {
+		ID        int    `json:"id"`
+		CommonName   *string	`json:"commonName"`
+		Position    *string	`json:"position"`
+		League *int	`json:"league"`
+		Nation  *int	`json:"nation"`
+		Club *int	`json:"club"`
+		Rating *int	`json:"rating"` 
+	}
+
+	err = app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	if input.CommonName != nil {
+		player.CommonName = *input.CommonName
+	}
+
+	if input.Position != nil {
+		player.Position = *input.Position
+	}
+
+	if input.League != nil {
+		player.League = *input.League
+	}
+
+	if input.Nation != nil {
+		player.Nation = *input.Nation
+	}
+
+	if input.Club != nil {
+		player.Club = *input.Club
+	}
+
+	if input.Rating != nil {
+		player.Rating = *input.Rating
+	}
+
+	v := validator.New()
+
+	if data2.ValidatePlayer(v, player); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	err = app.models.Players.Update(player)
+	if err != nil {
+		switch {
+		case errors.Is(err, data2.ErrEditConflict):
+			app.editConflictResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"player": player}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+

@@ -73,3 +73,7 @@ func (app *application) authenticationRequiredResponse(w http.ResponseWriter, r 
 	app.errorResponse(w, r, http.StatusForbidden, message)
 	}
 	
+	func (app *application) editConflictResponse(w http.ResponseWriter, r *http.Request) {
+		message := "unable to update the record due to an edit conflict, please try again"
+		app.errorResponse(w, r, http.StatusConflict, message)
+	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -51,4 +52,48 @@ func (p LeaguesModel) Get(id int64) (*Leagues, error) {
 	}
 
 	return &league, nil
+}
+
+func (p LeaguesModel) GetAll(name string, filters Filters) ([]*Leagues, Metadata, error) {
+	query := fmt.Sprintf(` 
+	SELECT COUNT(*) OVER(), id, name
+		FROM leagues
+		WHERE (to_tsvector('simple', name) @@ plainto_tsquery('simple', $1) OR $1 = '')
+		ORDER BY %s %s, id ASC
+		LIMIT $2 OFFSET $3`, filters.sortColumn(), filters.sortDirection())
+
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+	
+		args := []any{name, filters.limit(), filters.offset()}
+	
+		rows, err := p.DB.QueryContext(ctx, query, args...)
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+	
+		defer rows.Close()
+
+	totalRecords := filters.PageSize
+	leagues := []*Leagues{}
+	for rows.Next() {
+		var league Leagues
+		err := rows.Scan(
+			&totalRecords,
+			&league.ID,
+			&league.Name,
+		)
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+
+		leagues = append(leagues, &league)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, Metadata{}, err
+	}
+
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+	return leagues, metadata, nil
 }

@@ -35,5 +35,10 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet,"/futdraft/nations", app.ListNationsHandler)
 	router.HandlerFunc(http.MethodGet,"/futdraft/nations/:id", app.GetNationHandler)
 
+
+	// DELETE LATER
+	router.HandlerFunc(http.MethodPost, "/dbUpload", app.DbUpload)
+	router.HandlerFunc(http.MethodPost, "/tables", app.CreateTables)
+
 	return app.recoverPanic(app.rateLimit(app.authenticate(router)))
 }

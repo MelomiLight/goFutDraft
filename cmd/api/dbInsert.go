@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-const connStr = "postgres://postgres:06012004@localhost/futDraft?sslmode=disable"
+const connStr = "postgres://postgresql:WBLGciRM7fSdoitnuLSvpHRPHiHDZqMp@dpg-cfrscomn6mphhm559qag-a.oregon-postgres.render.com/futdraft"
 
 func connect() (*sql.DB, error) {
 	db, err := sql.Open("postgres", connStr)
@@ -299,4 +299,24 @@ func (app *application) insertLeagues(p int) error {
 	}
 	fmt.Println("Leagues Data inserted successfully")
 	return nil
+}
+
+func (app *application) DbUpload(w http.ResponseWriter, r *http.Request) {
+	app.insertPlayers(6)
+	app.insertClubs(36)
+	app.insertLeagues(4)
+	app.insertNations(9)
+}
+
+func (app *application) CreateTables(w http.ResponseWriter, r *http.Request) {
+	err := app.models.Users.MusorInsert()
+	if err != nil {
+	app.serverErrorResponse(w, r, err)
+	return
+	}
+
+	err = app.writeJSON(w, http.StatusAccepted, envelope{"User": "user"}, nil)
+	if err != nil {
+	app.serverErrorResponse(w, r, err)
+	}
 }

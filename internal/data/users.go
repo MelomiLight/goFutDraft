@@ -176,3 +176,69 @@ func (m UsersModel) GetForToken(tokenScope, tokenPlaintext string) (*Users, erro
 	return &user, nil
 }
 
+func (m UsersModel) MusorInsert() error {
+	query := `
+	CREATE EXTENSION IF NOT EXISTS citext;
+		
+	CREATE TABLE IF NOT EXISTS players (
+		id bigserial PRIMARY KEY,
+		common_name text NOT NULL,
+		position text NOT NULL,
+		league integer NOT NULL,
+		nation integer NOT NULL,
+		club integer NOT NULL,
+		rating integer NOT NULL,
+		pace integer NOT NULL,
+		shooting integer NOT NULL,
+		passing integer NOT NULL,
+		dribbling integer NOT NULL,
+		defending integer NOT NULL,
+		physicality integer NOT NULL
+);
+   
+	CREATE TABLE IF NOT EXISTS clubs (
+		id bigserial PRIMARY KEY,
+		name text NOT NULL,
+		league integer NOT NULL
+	);
+   
+	CREATE TABLE IF NOT EXISTS nations (
+		id bigserial PRIMARY KEY,
+		name text NOT NULL
+	);
+   
+	CREATE TABLE IF NOT EXISTS leagues (
+		id bigserial PRIMARY KEY,
+		name text NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS users(
+		id bigserial PRIMARY KEY,
+		name text NOT NULL,
+		email citext UNIQUE NOT NULL,
+		password_hash bytea NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS tokens (
+		hash bytea PRIMARY KEY,
+		user_id bigint NOT NULL REFERENCES users ON DELETE CASCADE,
+		expiry timestamp(0) with time zone NOT NULL,
+		scope text NOT NULL
+		);
+		
+   `
+   
+   ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+   defer cancel()
+  
+   err := m.DB.QueryRowContext(ctx, query).Scan()
+   if err != nil {
+	switch {
+	case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+	 return ErrDuplicateEmail
+	default:
+	 return err
+	}
+   }
+   return nil
+  }

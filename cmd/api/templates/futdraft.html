@@ -4,7 +4,18 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>FIFA Fut Draft</title>
-	<link rel="stylesheet" type="text/css" href="futdraft.css">
+	<link rel="stylesheet" type="text/css" href="/cmd/api/templates/futdraft.css">
+	<script src="wasm_exec.js"></script>
+	<script>
+		if (WebAssembly) {
+			const go = new Go();
+			WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+				go.run(result.instance);
+			});
+		} else {
+			console.log("WebAssembly is not supported in your browser")
+		}
+	</script>
 </head>
 <body>
 	<div class="up">
@@ -79,6 +90,7 @@
 			</div>
 		</center>
 	</div>
+	<p style="color: white">Скамейка запасных</p>
 	<div class="banka">
 		<div class="skameika">
 			<button>
@@ -108,6 +120,33 @@
 		<div class="skameika">
 			<button>
 				Merey
+			</button>
+		</div>
+	</div>
+	<div class="choose">
+		<div class="choice">
+			<button>
+				Choose 1
+			</button>
+		</div>
+		<div class="choice">
+			<button>
+				Choose 2
+			</button>
+		</div>
+		<div class="choice">
+			<button>
+				Choose 3
+			</button>
+		</div>
+		<div class="choice">
+			<button>
+				Choose 4
+			</button>
+		</div>
+		<div class="choice">
+			<button>
+				Choose 5
 			</button>
 		</div>
 	</div>

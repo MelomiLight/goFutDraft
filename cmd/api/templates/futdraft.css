@@ -1,5 +1,5 @@
 body{
-	background-image: url('images/background.jpg'); 
+	background-image: url('images/background.jpg');
 	background-repeat: no-repeat;
 }
 
@@ -8,13 +8,13 @@ button{
 	height: 100%;
 }
 
-.up, .middle, .down, .goalkeeper{
+.up, .middle, .down, .goalkeeper, .choose{
 	width: 100%;
 	height: 200px;
 	display: block;
 }
 
-.lw, .cf, .rw, .cm, .rb, .cb, .lb, .keeper{
+.lw, .cf, .rw, .cm, .rb, .cb, .lb, .keeper, .choice{
 	display: inline-block;
 	margin: auto;
 	border: double;

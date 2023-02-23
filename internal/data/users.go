@@ -175,3 +175,4 @@ func (m UsersModel) GetForToken(tokenScope, tokenPlaintext string) (*Users, erro
 
 	return &user, nil
 }
+

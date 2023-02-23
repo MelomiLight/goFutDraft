@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-const connStr = "postgres://postgres:postgres@localhost/futdraft?sslmode=disable"
+const connStr = "postgres://postgres:06012004@localhost/futDraft?sslmode=disable"
 
 func connect() (*sql.DB, error) {
 	db, err := sql.Open("postgres", connStr)

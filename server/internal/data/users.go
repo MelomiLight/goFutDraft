@@ -176,6 +176,67 @@ func (m UsersModel) GetForToken(tokenScope, tokenPlaintext string) (*Users, erro
 
 func (m UsersModel) MusorInsert() error {
 	query := `
+	CREATE TABLE IF NOT EXISTS position433 (
+		gk integer NOT NULL,
+		lb integer NOT NULL,
+		cb1 integer NOT NULL,
+		cb2 integer NOT NULL,
+		rb integer NOT NULL,
+		cm1 integer NOT NULL,
+		cm2 integer NOT NULL,
+		cm3 integer NOT NULL,
+		lw integer NOT NULL,
+		st integer NOT NULL,
+		rw integer NOT NULL
+	);
+	
+	CREATE TABLE IF NOT EXISTS tokens (
+		hash bytea PRIMARY KEY,
+		user_id bigint NOT NULL REFERENCES users ON DELETE CASCADE,
+		expiry timestamp(0) with time zone NOT NULL,
+		scope text NOT NULL
+		);
+
+		
+	CREATE TABLE IF NOT EXISTS users(
+		id bigserial PRIMARY KEY,
+		name text NOT NULL,
+		email citext UNIQUE NOT NULL,
+		password_hash bytea NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS leagues (
+		id bigserial PRIMARY KEY,
+		name text NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS nations (
+		id bigserial PRIMARY KEY,
+		name text NOT NULL
+	);
+	
+	CREATE TABLE IF NOT EXISTS clubs (
+		id bigserial PRIMARY KEY,
+		name text NOT NULL,
+		league integer NOT NULL
+	);
+
+	CREATE TABLE IF NOT EXISTS players (
+		id bigserial PRIMARY KEY,
+		common_name text NOT NULL,
+		position text NOT NULL,
+		league integer NOT NULL,
+		nation integer NOT NULL,
+		club integer NOT NULL,
+		rating integer NOT NULL,
+		pace integer NOT NULL,
+		shooting integer NOT NULL,
+		passing integer NOT NULL,
+		dribbling integer NOT NULL,
+		defending integer NOT NULL,
+		physicality integer NOT NULL
+	);
+
 	DROP TABLE IF EXISTS position433;
    
 	CREATE TABLE IF NOT EXISTS position433 (

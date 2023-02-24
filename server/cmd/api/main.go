@@ -40,7 +40,7 @@ func main() {
 	var cfg config
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
-	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgresql:rPQgC2lB3RlFFeXixxkYc7kj1DbM36tb@dpg-cfs83bun6mplppfnd7lg-a.oregon-postgres.render.com/futdraft_osxx", "PostgreSQL DSN")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://postgresql:8FvhK8hMczrATCGxGqciBtRu8tbmwJlM@dpg-cfs8dmun6mplppfopl2g-a.oregon-postgres.render.com/futdraft_298t", "PostgreSQL DSN")
 
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")

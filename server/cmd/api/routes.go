@@ -42,7 +42,5 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/dbUpload", app.DbUpload)
 	router.HandlerFunc(http.MethodPost, "/tables", app.CreateTables)
 
-	return app.recoverPanic(app
-.rateLimit(app
-.authenticate(router)))
+	return app.recoverPanic(app.rateLimit(app.authenticate(router)))
 }

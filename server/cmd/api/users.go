@@ -10,7 +10,7 @@ import (
 	"github.melomii/futDraft/internal/validator"
 )
 
-func (app *application) 	registerUserHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Name     string `json:"name"`
 		Email    string `json:"email"`
@@ -24,8 +24,8 @@ func (app *application) 	registerUserHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	user := &data2.Users{
-		Name:      input.Name,
-		Email:     input.Email,
+		Name:  input.Name,
+		Email: input.Email,
 	}
 
 	err = user.Password.Set(input.Password)
@@ -58,9 +58,8 @@ func (app *application) 	registerUserHandler(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
-	
-}
 
+}
 
 func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
@@ -115,42 +114,42 @@ func (app *application) loginUserHandler(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
-	
+
 }
 
 func (app *application) showRegistrationForm(w http.ResponseWriter, r *http.Request) {
 	// Define the data to be passed to the template
 	data := struct {
-	  Title string
+		Title string
 	}{
-	  Title: "User Registration",
+		Title: "User Registration",
 	}
-  
+
 	// Define the template
 	tmpl := template.Must(template.ParseFiles("./public/html/reg.html"))
-  
+
 	// Render the template
 	err := tmpl.Execute(w, data)
 	if err != nil {
-	  http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	  return
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
-  }
-  func (app *application) showLoginForm(w http.ResponseWriter, r *http.Request) {
+}
+func (app *application) showLoginForm(w http.ResponseWriter, r *http.Request) {
 	// Define the data to be passed to the template
 	data := struct {
-	  Title string
+		Title string
 	}{
-	  Title: "User Registration",
+		Title: "User Registration",
 	}
-  
+
 	// Define the template
 	tmpl := template.Must(template.ParseFiles("./public/html/login.html"))
-  
+
 	// Render the template
 	err := tmpl.Execute(w, data)
 	if err != nil {
-	  http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-	  return
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
-  }
+}

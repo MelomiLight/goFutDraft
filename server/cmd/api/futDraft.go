@@ -3,113 +3,160 @@ package main
 import (
 	"database/sql"
 	_ "database/sql"
-	"fmt"
+	"errors"
+	"net/http"
+
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.melomii/futDraft/internal/data"
-	"net/http"
+	data2 "github.melomii/futDraft/internal/data"
 )
 
 type PlayersModels struct {
 	DB *sql.DB
 }
 
-var schema = [11]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"}
+
 
 func (app *application) futDraftHandler(w http.ResponseWriter, r *http.Request) {
-	
 	user := app.contextGetUser(r)
 	if user.IsAnonymous() {
 		app.authenticationRequiredResponse(w, r)
 		return
 	}
 
-	fmt.Println("Hi! Welcome to FutDraft Game")
-}
-
-func (app *application) futDraftChooseHandler(w http.ResponseWriter, r *http.Request) {
-	//sql := "sql"
-	/*position := r.URL.Query().Get("position")
-	switch position {
-	case "up":
-		sql = `SELECT id FROM players WHERE position="RW" OR position="LW" OR position="ST" OR position="CF" ORDER BY RAND() LIMIT 5`
-	case "middle":
-		sql = `SELECT id FROM players WHERE position="CM" OR position="CAM" OR position="RM" OR position="LM" ORDER BY RAND() LIMIT 5`
-	case "down":
-		sql = `SELECT id FROM players WHERE position="RB" OR position="LB" OR position="CB" ORDER BY RAND() LIMIT 5`
-	case "goalkeeper":
-		sql = `SELECT id FROM players WHERE position="GK" ORDER BY RAND() LIMIT 5`
-	default:
-		sql = "error"
-	}*/
-	/*
-		var player Players
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		defer cancel()
-
-		err := p.DB.QueryRowContext(ctx, query, id).Scan(
-			&player.ID,
-			&player.CommonName,
-			&player.Position,
-			&player.League,
-			&player.Nation,
-			&player.Club,
-			&player.Rating,
-			&player.Pace,
-			&player.Shooting,
-			&player.Passing,
-			&player.Dribbling,
-			&player.Defending,
-			&player.Physicality,
-		)
-
-		if err != nil {
-			switch {
-			case errors.Is(err, sql.ErrNoRows):
-				return nil, ErrRecordNotFound
-			default:
-				return nil, err
-			}
+	position433All, err := app.models.Position433All.GetAll()
+	if err != nil {
+		switch {
+		case errors.Is(err, data2.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
 		}
-
-		return &player, nil*/
-}
-
-func (app *application) futDraftGameHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("===========================")
-	fmt.Println("\nHere is your one of the most popular schema in football world: 4-3-3\nWhere 1, 2 and 3 are atackers and 11 is goalkeeper\nNow you schould choose one of these positions: ")
-	drawSchema()
-	var choice int
-	fmt.Scan(choice)
-	options(choice)
-}
-
-func drawSchema() {
-	fmt.Println("      ", schema[0], "      ", schema[1], "      ", schema[2], "\n")
-	fmt.Println("      ", schema[3], "      ", schema[4], "      ", schema[5], "\n")
-	fmt.Println("", schema[6], "      ", schema[7], "      ", schema[8], "           ", schema[9], "\n")
-	fmt.Println("                 ", schema[10], "\n")
-}
-
-func options(position int) {
-	index := position - 1
-	sql := "sql"
-	if index <= 2 {
-		sql = `SELECT id FROM players WHERE position="RW" OR position="LW" OR position="ST" OR position="CF" ORDER BY RAND() LIMIT 1`
-	} else if index <= 5 {
-		sql = `SELECT id FROM players WHERE position="CM" OR position="CAM" OR position="RM" OR position="LM" ORDER BY RAND() LIMIT 1`
-	} else if index <= 9 {
-		sql = `SELECT id FROM players WHERE position="RB" OR position="LB" OR position="CB" ORDER BY RAND() LIMIT 1`
-	} else {
-		sql = `SELECT id FROM players WHERE position="GK" ORDER BY RAND() LIMIT 5`
+		return
 	}
-	fmt.Println("Choose a player:")
-	for i := 0; i < 5; i++ {
-		rows, _ := PlayersModels{}.DB.Query(sql)
-		defer rows.Close()
-		for rows.Next() {
-			var id int
-			//id = rows.Scan(id)
-			fmt.Println(id)
+	
+	// players,err:=app.models.Players.Get()
+	// if err != nil {
+	// 	switch {
+	// 	case errors.Is(err, data2.ErrRecordNotFound):
+	// 		app.notFoundResponse(w, r)
+	// 	default:
+	// 		app.serverErrorResponse(w, r, err)
+	// 	}
+	// 	return
+	// }
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"position433": position433All}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+
+}
+
+func (app *application) GetfutDraftChooseHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+	var position string
+	switch id{
+	case 1:
+		position="GK"
+	case 2:
+		position="LB"
+	case 3:
+		position="CB"
+	case 4:
+		position="CB"
+	case 5:
+		position="RB"
+	case 6:
+		position="CM"
+	case 7:
+		position="CM"
+	case 8:
+		position="CM"
+	case 9:
+		position="LW"
+	case 10:
+		position="ST"
+	case 11:
+		position="RW"
+	
+	}
+	positionP1, err := app.models.Players.GetRandByPosition(position)
+	positionP2, err := app.models.Players.GetRandByPosition(position)
+	positionP3, err := app.models.Players.GetRandByPosition(position)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, data2.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
 		}
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"player1": positionP1,"player2": positionP2,"player3": positionP3}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
 	}
 }
+
+func (app *application) PostfutDraftChooseHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		ID int `json:"id"`
+		Position string `json:"position"`
+	}
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	players := &data2.Position433{
+		ID: input.ID, 
+	}
+	position:=input.Position
+	switch position{
+	case "gk":
+		err = app.models.Position433.InsertGK(players.ID)
+	case "lb":
+		err = app.models.Position433.InsertLB(players.ID)
+	case "cb1":
+		err = app.models.Position433.InsertCB1(players.ID)
+	case "cb2":
+		err = app.models.Position433.InsertCB2(players.ID)
+	case "rb":
+		err = app.models.Position433.InsertRB(players.ID)
+	case "cm1":
+		err = app.models.Position433.InsertCM1(players.ID)
+	case "cm2":
+		err = app.models.Position433.InsertCM2(players.ID)
+	case "cm3":
+		err = app.models.Position433.InsertCM3(players.ID)
+	case "lw":
+		err = app.models.Position433.InsertLW(players.ID)
+	case "st":
+		err = app.models.Position433.InsertST(players.ID)
+	case "rw":
+		err = app.models.Position433.InsertRW(players.ID)
+	}
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusCreated, envelope{"Message": "Choosed successfully!"},nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+
+
+
+

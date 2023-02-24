@@ -17,6 +17,8 @@ type Models struct {
 	Tokens TokenModel
 	Leagues LeaguesModel
 	Users UsersModel
+	Position433 Position433Model
+	Position433All Position433AllModel
 }
 
 func NewModels(db *sql.DB) Models {
@@ -27,5 +29,7 @@ func NewModels(db *sql.DB) Models {
 		Leagues: LeaguesModel{DB: db},
 		Tokens: TokenModel{DB: db},
 		Users: UsersModel{DB: db},
+		Position433: Position433Model{DB: db},
+		Position433All: Position433AllModel{DB: db},
 	}
 }

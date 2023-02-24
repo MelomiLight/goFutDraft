@@ -194,6 +194,55 @@ func (p PlayersModel) Update(player *Players) error {
 	return nil
 }
 
+func (p PlayersModel) GetRandByPosition(position string) ([]*Players, error) {
+	query := ` 
+	SELECT * FROM players
+		WHERE position=$1 order by RANDOM() limit 1`
+
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+	
+		args := []any{position}
+	
+		rows, err := p.DB.QueryContext(ctx, query, args...)
+		if err != nil {
+			return nil, err
+		}
+	
+		defer rows.Close()
+
+	players := []*Players{}
+	for rows.Next() {
+		var player Players
+		err := rows.Scan(
+			&player.ID,
+			&player.CommonName,
+			&player.Position,
+			&player.League,
+			&player.Nation,
+			&player.Club,
+			&player.Rating,
+			&player.Pace,
+			&player.Shooting,
+			&player.Passing,
+			&player.Dribbling,
+			&player.Defending,
+			&player.Physicality,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		players = append(players, &player)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return players, nil
+}
+
 func ValidatePlayer(v *validator.Validator, player *Players) {
 	v.Check(player.CommonName != "", "commonName", "must be provided")
 	v.Check(len(player.CommonName) <= 500, "commonName", "must not be more than 500 bytes long")

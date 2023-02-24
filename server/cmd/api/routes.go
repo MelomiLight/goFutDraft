@@ -17,9 +17,10 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/login", app.loginUserHandler)
 	router.HandlerFunc(http.MethodGet, "/login", app.showLoginForm)
 
-	router.HandlerFunc(http.MethodGet, "/futdraft", app.futDraftHandler)
-	router.HandlerFunc(http.MethodGet, "/futdraft/play", app.futDraftGameHandler)
-	router.HandlerFunc(http.MethodGet, "/futdraft/choose", app.futDraftChooseHandler)
+	router.HandlerFunc(http.MethodGet, "/futdraft/play", app.futDraftHandler)
+	router.HandlerFunc(http.MethodPost, "/futdraft/play/input", app.PostfutDraftChooseHandler)
+	router.HandlerFunc(http.MethodGet, "/futdraft/play/:id", app.GetfutDraftChooseHandler)
+	
 
 	router.HandlerFunc(http.MethodGet, "/futdraft/players", app.ListPlayersHandler)
 	router.HandlerFunc(http.MethodGet, "/futdraft/players/:id", app.GetPlayerHandler)

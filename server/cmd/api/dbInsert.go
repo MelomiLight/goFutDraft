@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-const connStr = "postgres://postgresql:rPQgC2lB3RlFFeXixxkYc7kj1DbM36tb@dpg-cfs83bun6mplppfnd7lg-a.oregon-postgres.render.com/futdraft_osxx"
+const connStr = "postgres://postgresql:8FvhK8hMczrATCGxGqciBtRu8tbmwJlM@dpg-cfs8dmun6mplppfopl2g-a.oregon-postgres.render.com/futdraft_298t"
 
 func connect() (*sql.DB, error) {
 	db, err := sql.Open("postgres", connStr)

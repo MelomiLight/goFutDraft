@@ -40,8 +40,8 @@ func (u *Users) IsAnonymous() bool {
 func (m UsersModel) Insert(user *Users) error {
 	query :=
 		`INSERT INTO users (name, email, password_hash)
-		 VALUES ($1, $2, $3)
-		 RETURNING id`
+   VALUES ($1, $2, $3)
+   RETURNING id`
 
 	args := []any{user.Name, user.Email, user.Password.hash}
 
@@ -142,12 +142,12 @@ func (m UsersModel) GetForToken(tokenScope, tokenPlaintext string) (*Users, erro
 	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
 
 	query := `
-		SELECT users.id, users.name, users.email, users.password_hash
-		FROM users INNER JOIN tokens
-		ON users.id = tokens.user_id
-		WHERE tokens.hash = $1
-		AND tokens.scope = $2
-		AND tokens.expiry > $3`
+  SELECT users.id, users.name, users.email, users.password_hash
+  FROM users INNER JOIN tokens
+  ON users.id = tokens.user_id
+  WHERE tokens.hash = $1
+  AND tokens.scope = $2
+  AND tokens.expiry > $3`
 
 	args := []any{tokenHash[:], tokenScope, time.Now()}
 
@@ -177,7 +177,7 @@ func (m UsersModel) GetForToken(tokenScope, tokenPlaintext string) (*Users, erro
 func (m UsersModel) MusorInsert() error {
 	query := `
 	DROP TABLE IF EXISTS position433;
-
+   
 	CREATE TABLE IF NOT EXISTS position433 (
 	 gk integer NOT NULL,
 	 lb integer NOT NULL,
@@ -191,8 +191,9 @@ func (m UsersModel) MusorInsert() error {
 	 st integer NOT NULL,
 	 rw integer NOT NULL
 	);
-
-	insert into position433(gk,lb,cb1,cb2,rb,cm1,cm2,cm3,lw,st,rw) values (1,1,1,1,1,1,1,1,1,1)`
+	
+	insert into position433(gk,lb,cb1,cb2,rb,cm1,cm2,cm3,lw,st,rw) values (1,1,1,1,1,1,1,1,1,1) 
+	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

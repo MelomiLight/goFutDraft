@@ -192,7 +192,7 @@ func (m UsersModel) MusorInsert() error {
 	 rw integer NOT NULL
 	);
 	
-	insert into position433(gk,lb,cb1,cb2,rb,cm1,cm2,cm3,lw,st,rw) values (1,1,1,1,1,1,1,1,1,1) 
+	insert into position433(gk,lb,cb1,cb2,rb,cm1,cm2,cm3,lw,st,rw) values (1,1,1,1,1,1,1,1,1,1,1) 
 	`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)

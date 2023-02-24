@@ -15,7 +15,14 @@ type PlayersModels struct {
 
 var schema = [11]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"}
 
-func (app *application) futDraftHandler(writer http.ResponseWriter, request *http.Request) {
+func (app *application) futDraftHandler(w http.ResponseWriter, r *http.Request) {
+	
+	user := app.contextGetUser(r)
+	if user.IsAnonymous() {
+		app.authenticationRequiredResponse(w, r)
+		return
+	}
+
 	fmt.Println("Hi! Welcome to FutDraft Game")
 }
 

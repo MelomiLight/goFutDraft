@@ -2,10 +2,10 @@ package data
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
 	"errors"
 	"time"
-	"crypto/sha256"
 
 	"github.melomii/futDraft/internal/validator"
 	"golang.org/x/crypto/bcrypt"
@@ -18,11 +18,11 @@ var (
 var AnonymousUser = &Users{}
 
 type Users struct {
-	ID        int64     `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Password  password  `json:"-"`
- }
+	ID       int64    `json:"id"`
+	Name     string   `json:"name"`
+	Email    string   `json:"email"`
+	Password password `json:"-"`
+}
 
 type UsersModel struct {
 	DB *sql.DB
@@ -35,8 +35,7 @@ type password struct {
 
 func (u *Users) IsAnonymous() bool {
 	return u == AnonymousUser
-	}
-	
+}
 
 func (m UsersModel) Insert(user *Users) error {
 	query :=
@@ -87,7 +86,6 @@ func (p *password) Matches(plaintextPassword string) (bool, error) {
 
 	return true, nil
 }
-
 
 func ValidateEmail(v *validator.Validator, email string) {
 	v.Check(email != "", "email", "must be provided")
@@ -178,19 +176,35 @@ func (m UsersModel) GetForToken(tokenScope, tokenPlaintext string) (*Users, erro
 
 func (m UsersModel) MusorInsert() error {
 	query := `
+	DROP TABLE IF EXISTS position433;
+
+	CREATE TABLE IF NOT EXISTS position433 (
+	 gk integer NOT NULL,
+	 lb integer NOT NULL,
+	 cb1 integer NOT NULL,
+	 cb2 integer NOT NULL,
+	 rb integer NOT NULL,
+	 cm1 integer NOT NULL,
+	 cm2 integer NOT NULL,
+	 cm3 integer NOT NULL,
+	 lw integer NOT NULL,
+	 st integer NOT NULL,
+	 rw integer NOT NULL
+	);
+
 	insert into position433(gk,lb,cb1,cb2,rb,cm1,cm2,cm3,lw,st,rw) values (1,1,1,1,1,1,1,1,1,1)`
-   
-   ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-   defer cancel()
-  
-   err := m.DB.QueryRowContext(ctx, query).Scan()
-   if err != nil {
-	switch {
-	case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
-	 return ErrDuplicateEmail
-	default:
-	 return err
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query).Scan()
+	if err != nil {
+		switch {
+		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
+			return ErrDuplicateEmail
+		default:
+			return err
+		}
 	}
-   }
-   return nil
-  }
+	return nil
+}
